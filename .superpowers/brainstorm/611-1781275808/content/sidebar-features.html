@@ -1,0 +1,135 @@
+<h2>側邊欄功能層級</h2>
+<p class="subtitle">地圖左側固定，右側側欄的內容豐富程度</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117; border-radius:8px; padding:10px; min-height:220px; display:flex; flex-direction:column; gap:7px; font-size:9px;">
+      <div style="color:#74b9ff; font-weight:700; letter-spacing:0.1em; font-size:10px;">東京首都圈選取器</div>
+      <div style="border-top:1px solid #1e2d3d; padding-top:7px;">
+        <div style="color:#64748b; margin-bottom:5px;">選取數量</div>
+        <div style="display:flex; gap:5px;">
+          <div style="background:#1a2535; border:1px solid #2d4a7a; border-radius:4px; color:#94a3b8; padding:4px 8px; width:28px; text-align:center;">5</div>
+          <div style="background:#3b82f6; color:#fff; padding:4px 10px; border-radius:4px; flex:1; text-align:center;">隨機選取</div>
+        </div>
+        <div style="background:#1a2535; border:1px solid #374151; color:#64748b; padding:3px; border-radius:4px; text-align:center; margin-top:5px;">清除選取</div>
+      </div>
+      <div style="border-top:1px solid #1e2d3d; padding-top:7px; flex:1;">
+        <div style="color:#64748b; margin-bottom:5px;">已選取 3 個區域</div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="background:#1a2535; border-left:2px solid #ff6b6b; padding:4px 7px; border-radius:2px; color:#e2e8f0;">新宿區 <span style="color:#64748b;">東京都</span></div>
+          <div style="background:#1a2535; border-left:2px solid #ff6b6b; padding:4px 7px; border-radius:2px; color:#e2e8f0;">橫濱市 <span style="color:#64748b;">神奈川縣</span></div>
+          <div style="background:#1a2535; border-left:2px solid #ff6b6b; padding:4px 7px; border-radius:2px; color:#e2e8f0;">さいたま市 <span style="color:#64748b;">埼玉縣</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>簡潔版</h3>
+      <p>選取控制 + 結果清單。乾淨直接，零干擾</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="stats" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117; border-radius:8px; padding:10px; min-height:220px; display:flex; flex-direction:column; gap:6px; font-size:9px;">
+      <div style="color:#74b9ff; font-weight:700; letter-spacing:0.1em; font-size:10px;">東京首都圈選取器</div>
+      <!-- 縣市篩選 -->
+      <div style="display:flex; gap:3px; flex-wrap:wrap;">
+        <span style="background:#3b82f622; border:1px solid #3b82f6; color:#74b9ff; padding:1px 6px; border-radius:10px; font-size:8px;">全部</span>
+        <span style="background:#1a2535; border:1px solid #2d4a7a; color:#64748b; padding:1px 6px; border-radius:10px; font-size:8px;">東京都</span>
+        <span style="background:#1a2535; border:1px solid #2d4a7a; color:#64748b; padding:1px 6px; border-radius:10px; font-size:8px;">神奈川</span>
+        <span style="background:#1a2535; border:1px solid #2d4a7a; color:#64748b; padding:1px 6px; border-radius:10px; font-size:8px;">埼玉</span>
+      </div>
+      <!-- Controls -->
+      <div style="display:flex; gap:5px;">
+        <div style="background:#1a2535; border:1px solid #2d4a7a; border-radius:4px; color:#94a3b8; padding:3px 6px; width:24px; text-align:center;">5</div>
+        <div style="background:#3b82f6; color:#fff; padding:3px 8px; border-radius:4px; flex:1; text-align:center;">隨機選取</div>
+        <div style="background:#1a2535; border:1px solid #374151; color:#64748b; padding:3px 6px; border-radius:4px;">清除</div>
+      </div>
+      <!-- Stats cards -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+        <div style="background:#111827; border:1px solid #1e2d3d; border-radius:4px; padding:5px 7px;">
+          <div style="color:#64748b; font-size:7px;">總人口</div>
+          <div style="color:#74b9ff; font-weight:700;">2.8M</div>
+        </div>
+        <div style="background:#111827; border:1px solid #1e2d3d; border-radius:4px; padding:5px 7px;">
+          <div style="color:#64748b; font-size:7px;">總面積</div>
+          <div style="color:#74b9ff; font-weight:700;">312 km²</div>
+        </div>
+      </div>
+      <!-- Result list -->
+      <div style="flex:1; overflow:hidden;">
+        <div style="color:#64748b; margin-bottom:4px; font-size:8px;">選取結果</div>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <div style="background:#1a2535; border-left:2px solid #ff6b6b; padding:3px 6px; border-radius:2px;">
+            <div style="color:#e2e8f0;">新宿區</div>
+            <div style="color:#64748b; font-size:7px;">346,000 人 • 18.2 km²</div>
+          </div>
+          <div style="background:#1a2535; border-left:2px solid #fd79a8; padding:3px 6px; border-radius:2px;">
+            <div style="color:#e2e8f0;">橫濱市</div>
+            <div style="color:#64748b; font-size:7px;">3,774,000 人 • 437.4 km²</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>統計增強版（推薦）</h3>
+      <p>縣市篩選 chip、選取後顯示合計人口／面積、每個結果卡片顯示詳細數據</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="full" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117; border-radius:8px; padding:10px; min-height:220px; display:flex; flex-direction:column; gap:5px; font-size:9px;">
+      <div style="color:#74b9ff; font-weight:700; letter-spacing:0.1em; font-size:10px;">東京首都圈選取器</div>
+      <!-- 縣市篩選 -->
+      <div style="display:flex; gap:3px; flex-wrap:wrap;">
+        <span style="background:#3b82f622; border:1px solid #3b82f6; color:#74b9ff; padding:1px 5px; border-radius:10px; font-size:7px;">全部</span>
+        <span style="background:#1a2535; border:1px solid #2d4a7a; color:#64748b; padding:1px 5px; border-radius:10px; font-size:7px;">東京都</span>
+        <span style="background:#1a2535; border:1px solid #2d4a7a; color:#64748b; padding:1px 5px; border-radius:10px; font-size:7px;">神奈川</span>
+        <span style="background:#1a2535; border:1px solid #2d4a7a; color:#64748b; padding:1px 5px; border-radius:10px; font-size:7px;">+3</span>
+      </div>
+      <!-- Controls -->
+      <div style="display:flex; gap:4px;">
+        <div style="background:#1a2535; border:1px solid #2d4a7a; border-radius:4px; color:#94a3b8; padding:2px 5px; width:22px; text-align:center;">5</div>
+        <div style="background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; flex:1; text-align:center;">隨機</div>
+        <div style="background:#1a2535; border:1px solid #374151; color:#64748b; padding:2px 5px; border-radius:4px;">清除</div>
+        <div style="background:#1a2535; border:1px solid #374151; color:#64748b; padding:2px 5px; border-radius:4px;">⬇</div>
+      </div>
+      <!-- Mini bar chart -->
+      <div style="background:#111827; border:1px solid #1e2d3d; border-radius:4px; padding:5px 7px;">
+        <div style="color:#64748b; font-size:7px; margin-bottom:4px;">縣市分布</div>
+        <div style="display:flex; gap:3px; align-items:flex-end; height:22px;">
+          <div style="flex:3; background:#74b9ff88; border-radius:1px; height:100%;"></div>
+          <div style="flex:2; background:#fd79a888; border-radius:1px; height:70%;"></div>
+          <div style="flex:1; background:#55a3ff88; border-radius:1px; height:40%;"></div>
+          <div style="flex:1; background:#00b89488; border-radius:1px; height:30%;"></div>
+        </div>
+        <div style="display:flex; gap:3px; margin-top:2px;">
+          <span style="flex:3; color:#74b9ff; font-size:6px;">東京</span>
+          <span style="flex:2; color:#fd79a8; font-size:6px;">神奈</span>
+          <span style="flex:1; color:#55a3ff; font-size:6px;">埼玉</span>
+          <span style="flex:1; color:#00b894; font-size:6px;">千葉</span>
+        </div>
+      </div>
+      <!-- Result list compact -->
+      <div style="flex:1;">
+        <div style="color:#64748b; font-size:7px; margin-bottom:3px;">選取結果</div>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <div style="background:#1a2535; border-left:2px solid #ff6b6b; padding:2px 5px; border-radius:2px; display:flex; justify-content:space-between;">
+            <span style="color:#e2e8f0;">新宿區</span><span style="color:#64748b; font-size:7px;">346K 人</span>
+          </div>
+          <div style="background:#1a2535; border-left:2px solid #fd79a8; padding:2px 5px; border-radius:2px; display:flex; justify-content:space-between;">
+            <span style="color:#e2e8f0;">橫濱市</span><span style="color:#64748b; font-size:7px;">3.7M 人</span>
+          </div>
+          <div style="background:#1a2535; border-left:2px solid #74b9ff; padding:2px 5px; border-radius:2px; display:flex; justify-content:space-between;">
+            <span style="color:#e2e8f0;">さいたま</span><span style="color:#64748b; font-size:7px;">1.3M 人</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>全功能版</h3>
+      <p>縣市篩選 + 統計 + 縣市分布長條圖 + CSV 匯出。功能最完整，側欄較緊湊</p>
+    </div>
+  </div>
+
+</div>

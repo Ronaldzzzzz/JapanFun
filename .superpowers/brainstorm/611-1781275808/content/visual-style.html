@@ -1,0 +1,70 @@
+<h2>整體視覺風格方向</h2>
+<p class="subtitle">這將決定整個網站的配色、字體與氛圍</p>
+
+<div class="cards">
+  <div class="card" data-choice="dark" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1a1f2e 100%); padding: 20px; border-radius: 8px; min-height: 160px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <div style="width:8px; height:8px; border-radius:50%; background:#ff6b6b;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#ffd93d;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#6bcb77;"></div>
+      </div>
+      <div style="background:#1f2937; border-radius:6px; padding:12px; margin-bottom:8px;">
+        <div style="color:#74b9ff; font-size:11px; font-weight:600; margin-bottom:6px;">東京都 • 23區</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <span style="background:#2d3748; color:#e2e8f0; padding:2px 8px; border-radius:12px; font-size:10px;">新宿區</span>
+          <span style="background:#ff6b6b33; border:1px solid #ff6b6b; color:#ff6b6b; padding:2px 8px; border-radius:12px; font-size:10px;">澀谷區 ✓</span>
+        </div>
+      </div>
+      <div style="height:60px; background:#263147; border-radius:6px; border:1px solid #2d4a7a; display:flex; align-items:center; justify-content:center; color:#4a9eff; font-size:11px;">🗾 地圖區域</div>
+    </div>
+    <div class="card-body">
+      <h3>暗色科技風</h3>
+      <p>深色背景、霓虹藍／紅高亮，現代感強，適合長時間查看地圖</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="light" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%); padding: 20px; border-radius: 8px; min-height: 160px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <div style="width:8px; height:8px; border-radius:50%; background:#ef4444;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#f59e0b;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#10b981;"></div>
+      </div>
+      <div style="background:#ffffff; border-radius:6px; padding:12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <div style="color:#3b82f6; font-size:11px; font-weight:600; margin-bottom:6px;">東京都 • 23區</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <span style="background:#f1f5f9; color:#374151; padding:2px 8px; border-radius:12px; font-size:10px;">新宿區</span>
+          <span style="background:#fef2f2; border:1px solid #ef4444; color:#ef4444; padding:2px 8px; border-radius:12px; font-size:10px;">澀谷區 ✓</span>
+        </div>
+      </div>
+      <div style="height:60px; background:#dbeafe; border-radius:6px; border:1px solid #93c5fd; display:flex; align-items:center; justify-content:center; color:#2563eb; font-size:11px;">🗾 地圖區域</div>
+    </div>
+    <div class="card-body">
+      <h3>明亮簡約風</h3>
+      <p>白底淺灰、清爽藍色調，清晰易讀，適合日常使用與分享截圖</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="japan" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #1a0a0a 0%, #2d0f0f 50%, #1f1520 100%); padding: 20px; border-radius: 8px; min-height: 160px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <div style="width:8px; height:8px; border-radius:50%; background:#e53e3e;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#d4a853;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#805ad5;"></div>
+      </div>
+      <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,100,100,0.3); border-radius:6px; padding:12px; margin-bottom:8px;">
+        <div style="color:#fc8181; font-size:11px; font-weight:600; margin-bottom:6px; letter-spacing:0.1em;">東京都 • 二十三区</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <span style="background:rgba(255,255,255,0.08); color:#e2c9a0; padding:2px 8px; border-radius:2px; font-size:10px;">新宿区</span>
+          <span style="background:#e53e3e22; border:1px solid #e53e3e; color:#fc8181; padding:2px 8px; border-radius:2px; font-size:10px;">渋谷区 ✓</span>
+        </div>
+      </div>
+      <div style="height:60px; background:rgba(255,50,50,0.08); border-radius:2px; border:1px solid rgba(229,62,62,0.4); display:flex; align-items:center; justify-content:center; color:#fc8181; font-size:11px; letter-spacing:0.05em;">🗾 地図エリア</div>
+    </div>
+    <div class="card-body">
+      <h3>日本傳統風</h3>
+      <p>深墨底色、朱紅金色點綴，帶有和風質感，強調日本文化主題</p>
+    </div>
+  </div>
+</div>

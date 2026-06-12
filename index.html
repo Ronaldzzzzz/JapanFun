@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>東京首都圈隨機地圖選取器</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>東京首都圈隨機地圖選取器</h1>
+            <p>選擇與東京都相鄰的縣市區鎮</p>
+        </header>
+        
+        <div class="control-panel">
+            <div class="input-group">
+                <label for="count">選取數量：</label>
+                <input type="number" id="count" min="1" max="50" value="5">
+                <button id="random-select">隨機選取</button>
+                <button id="clear-selection">清除選取</button>
+            </div>
+            <div class="info-panel">
+                <div class="stats">
+                    <span>總區域數：<span id="total-areas">0</span></span>
+                    <span>已選取：<span id="selected-count">0</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+        
+        <div class="results-panel">
+            <h3>選取結果</h3>
+            <div id="selected-areas"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
