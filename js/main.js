@@ -17,7 +17,7 @@ function formatPopulation(n) {
 
 class TokyoMetroApp {
     constructor(geojsonData) {
-        this.activePrefs = new Set(); // 空 Set = 全部；有值 = 只選這些縣市
+        this.activePrefecture = 'all';
         this.map = new TokyoMetroMap(geojsonData, {
             onSelectionChange: () => this.renderSidebar()
         });
@@ -32,18 +32,10 @@ class TokyoMetroApp {
         wrap.innerHTML = '';
         PREFECTURE_OPTIONS.forEach((opt) => {
             const chip = document.createElement('button');
-            const isAll = opt.key === 'all';
-            const isActive = isAll ? this.activePrefs.size === 0 : this.activePrefs.has(opt.key);
-            chip.className = 'chip' + (isActive ? ' active' : '');
+            chip.className = 'chip' + (this.activePrefecture === opt.key ? ' active' : '');
             chip.textContent = opt.label;
             chip.addEventListener('click', () => {
-                if (isAll) {
-                    this.activePrefs.clear();
-                } else if (this.activePrefs.has(opt.key)) {
-                    this.activePrefs.delete(opt.key);
-                } else {
-                    this.activePrefs.add(opt.key);
-                }
+                this.activePrefecture = opt.key;
                 this.renderChips();
             });
             wrap.appendChild(chip);
@@ -77,11 +69,11 @@ class TokyoMetroApp {
         });
     }
 
-    // 依目前縣市篩選取得隨機池（空 Set = 全部）
+    // 依目前縣市篩選取得隨機池
     poolIds() {
         return this.map.getAllFeatures()
-            .filter((f) => this.activePrefs.size === 0
-                || this.activePrefs.has(f.properties.prefecture))
+            .filter((f) => this.activePrefecture === 'all'
+                || f.properties.prefecture === this.activePrefecture)
             .map((f) => f.properties.id);
     }
 
