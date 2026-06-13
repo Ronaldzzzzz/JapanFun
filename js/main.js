@@ -1,4 +1,4 @@
-// 應用邏輯：側邊欄 UI、地區/都道府縣兩層篩選、統計、快捷鍵
+// 應用邏輯：側邊欄 UI、基地縣＋鄰縣篩選、快捷鍵
 
 const REGIONS = [
     { key: '北海道', label: '北海道',     prefs: ['北海道'] },
@@ -11,10 +11,61 @@ const REGIONS = [
     { key: '九州・沖縄', label: '九州・沖縄', prefs: ['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'] }
 ];
 
+// 物理接壤鄰縣對照表（雙向對稱，島嶼/半島不含跨海）
+const PREF_ADJACENCY = {
+    '北海道':   [],
+    '青森県':   ['岩手県','秋田県'],
+    '岩手県':   ['青森県','秋田県','宮城県'],
+    '宮城県':   ['岩手県','秋田県','山形県','福島県'],
+    '秋田県':   ['青森県','岩手県','宮城県','山形県'],
+    '山形県':   ['秋田県','宮城県','福島県','新潟県'],
+    '福島県':   ['宮城県','山形県','茨城県','栃木県','群馬県','新潟県'],
+    '茨城県':   ['福島県','栃木県','埼玉県','千葉県'],
+    '栃木県':   ['福島県','茨城県','群馬県','埼玉県'],
+    '群馬県':   ['福島県','栃木県','埼玉県','長野県','新潟県'],
+    '埼玉県':   ['茨城県','栃木県','群馬県','千葉県','東京都','山梨県'],
+    '千葉県':   ['茨城県','埼玉県','東京都'],
+    '東京都':   ['埼玉県','千葉県','神奈川県','山梨県'],
+    '神奈川県': ['東京都','山梨県','静岡県'],
+    '新潟県':   ['山形県','福島県','群馬県','長野県','富山県'],
+    '富山県':   ['新潟県','石川県','長野県','岐阜県'],
+    '石川県':   ['富山県','福井県','岐阜県'],
+    '福井県':   ['石川県','岐阜県','滋賀県','京都府'],
+    '山梨県':   ['埼玉県','東京都','神奈川県','長野県','静岡県'],
+    '長野県':   ['群馬県','新潟県','富山県','山梨県','静岡県','愛知県','岐阜県'],
+    '岐阜県':   ['富山県','石川県','福井県','長野県','愛知県','三重県','滋賀県'],
+    '静岡県':   ['神奈川県','山梨県','長野県','愛知県'],
+    '愛知県':   ['長野県','岐阜県','静岡県','三重県'],
+    '三重県':   ['岐阜県','愛知県','滋賀県','奈良県','和歌山県'],
+    '滋賀県':   ['福井県','岐阜県','三重県','京都府'],
+    '京都府':   ['福井県','滋賀県','大阪府','兵庫県','奈良県'],
+    '大阪府':   ['京都府','兵庫県','奈良県','和歌山県'],
+    '兵庫県':   ['京都府','大阪府','鳥取県','岡山県'],
+    '奈良県':   ['三重県','京都府','大阪府','和歌山県'],
+    '和歌山県': ['三重県','大阪府','奈良県'],
+    '鳥取県':   ['兵庫県','島根県','岡山県'],
+    '島根県':   ['鳥取県','岡山県','広島県','山口県'],
+    '岡山県':   ['兵庫県','鳥取県','島根県','広島県'],
+    '広島県':   ['島根県','岡山県','山口県'],
+    '山口県':   ['島根県','広島県'],
+    '徳島県':   ['香川県','愛媛県','高知県'],
+    '香川県':   ['徳島県','愛媛県'],
+    '愛媛県':   ['香川県','徳島県','高知県'],
+    '高知県':   ['徳島県','愛媛県'],
+    '福岡県':   ['佐賀県','熊本県','大分県'],
+    '佐賀県':   ['福岡県','長崎県'],
+    '長崎県':   ['佐賀県'],
+    '熊本県':   ['福岡県','大分県','宮崎県','鹿児島県'],
+    '大分県':   ['福岡県','熊本県','宮崎県'],
+    '宮崎県':   ['大分県','熊本県','鹿児島県'],
+    '鹿児島県': ['熊本県','宮崎県'],
+    '沖縄県':   [],
+};
+
 class TokyoMetroApp {
     constructor(geojsonData) {
-        this.activePrefs = new Set();    // 空 = 全日本；有值 = 只抽這些都道府縣
-        this.expandedRegions = new Set(); // 目前展開的地區
+        this.anchorPref = null;           // null = 全日本；字串 = 基地縣
+        this.expandedRegions = new Set();
         this.map = new TokyoMetroMap(geojsonData, {
             onSelectionChange: () => this.renderSidebar()
         });
@@ -28,32 +79,55 @@ class TokyoMetroApp {
         const wrap = document.getElementById('prefecture-chips');
         wrap.innerHTML = '';
 
-        // 「全日本」重置鈕
-        const allBtn = document.createElement('button');
-        allBtn.className = 'chip all-chip' + (this.activePrefs.size === 0 ? ' active' : '');
-        allBtn.textContent = '全日本';
-        allBtn.addEventListener('click', () => {
-            this.activePrefs.clear();
-            this.renderFilter();
-        });
-        wrap.appendChild(allBtn);
+        const neighbors = this.anchorPref ? (PREF_ADJACENCY[this.anchorPref] || []) : [];
 
-        // 各地區手風琴
+        // 抽選範圍指示器
+        const indicator = document.createElement('div');
+        indicator.className = 'pool-indicator';
+
+        if (!this.anchorPref) {
+            const allChip = document.createElement('span');
+            allChip.className = 'pool-chip pool-all';
+            allChip.textContent = '全日本';
+            indicator.appendChild(allChip);
+        } else {
+            const anchorChip = document.createElement('span');
+            anchorChip.className = 'pool-chip pool-anchor';
+            anchorChip.textContent = this.anchorPref;
+            indicator.appendChild(anchorChip);
+
+            neighbors.forEach((p) => {
+                const nc = document.createElement('span');
+                nc.className = 'pool-chip pool-neighbor';
+                nc.textContent = p;
+                indicator.appendChild(nc);
+            });
+
+            const reset = document.createElement('button');
+            reset.className = 'pool-reset';
+            reset.textContent = '全日本';
+            reset.addEventListener('click', () => { this.anchorPref = null; this.renderFilter(); });
+            indicator.appendChild(reset);
+        }
+        wrap.appendChild(indicator);
+
+        // 各地區手風琴（點縣市 chip 設定基地縣）
         REGIONS.forEach((region) => {
-            const selectedInRegion = region.prefs.filter((p) => this.activePrefs.has(p)).length;
+            const isAnchorRegion = region.prefs.includes(this.anchorPref);
+            const hasNeighborInRegion = this.anchorPref
+                && region.prefs.some((p) => neighbors.includes(p));
             const isExpanded = this.expandedRegions.has(region.key);
             const color = REGION_COLORS[region.key] || '#95a5a6';
 
             const group = document.createElement('div');
             group.className = 'region-group';
 
-            // 地區標題列
             const header = document.createElement('button');
-            header.className = 'region-header' + (selectedInRegion > 0 ? ' has-selection' : '');
-            header.style.borderLeftColor = color;
+            header.className = 'region-header' + (isAnchorRegion || hasNeighborInRegion ? ' has-selection' : '');
+            header.style.borderLeftColor = isAnchorRegion ? color : (hasNeighborInRegion ? color + '80' : 'var(--border-subtle)');
             header.innerHTML = `
                 <span class="region-label">${region.label}</span>
-                ${selectedInRegion > 0 ? `<span class="region-count" style="color:${color}">${selectedInRegion}/${region.prefs.length}</span>` : ''}
+                ${isAnchorRegion ? `<span class="region-count" style="color:${color}">基地</span>` : (hasNeighborInRegion ? `<span class="region-count" style="color:${color}99">隣縣</span>` : '')}
                 <span class="region-arrow">${isExpanded ? '▲' : '▼'}</span>`;
             header.addEventListener('click', () => {
                 if (this.expandedRegions.has(region.key)) this.expandedRegions.delete(region.key);
@@ -62,19 +136,19 @@ class TokyoMetroApp {
             });
             group.appendChild(header);
 
-            // 都道府縣 chip 列（可收合）
             if (isExpanded) {
                 const prefWrap = document.createElement('div');
                 prefWrap.className = 'region-prefs';
                 region.prefs.forEach((pref) => {
+                    const isAnchor = pref === this.anchorPref;
+                    const isNeighbor = neighbors.includes(pref);
                     const chip = document.createElement('button');
-                    const isActive = this.activePrefs.has(pref);
-                    chip.className = 'chip pref-chip' + (isActive ? ' active' : '');
-                    if (isActive) chip.style.borderColor = color;
+                    chip.className = 'chip pref-chip'
+                        + (isAnchor ? ' pref-anchor' : (isNeighbor ? ' pref-neighbor' : ''));
                     chip.textContent = pref;
                     chip.addEventListener('click', () => {
-                        if (this.activePrefs.has(pref)) this.activePrefs.delete(pref);
-                        else this.activePrefs.add(pref);
+                        // 點已選基地縣 → 取消（全日本）；點其他縣 → 設為基地
+                        this.anchorPref = isAnchor ? null : pref;
                         this.renderFilter();
                     });
                     prefWrap.appendChild(chip);
@@ -105,7 +179,6 @@ class TokyoMetroApp {
                 e.preventDefault();
                 this.handleRandomSelect();
             }
-            // Ctrl+C 與瀏覽器複製衝突，改用 Ctrl+Shift+C
             if (mod && e.shiftKey && e.key.toLowerCase() === 'c') {
                 e.preventDefault();
                 this.handleClear();
@@ -113,11 +186,14 @@ class TokyoMetroApp {
         });
     }
 
-    // 依目前篩選取得隨機池（空 Set = 全日本）
+    // 基地縣＋鄰縣的 feature id 池；anchorPref 為 null 時為全日本
     poolIds() {
+        if (!this.anchorPref) {
+            return this.map.getAllFeatures().map((f) => f.properties.id);
+        }
+        const pool = new Set([this.anchorPref, ...(PREF_ADJACENCY[this.anchorPref] || [])]);
         return this.map.getAllFeatures()
-            .filter((f) => this.activePrefs.size === 0
-                || this.activePrefs.has(f.properties.prefecture))
+            .filter((f) => pool.has(f.properties.prefecture))
             .map((f) => f.properties.id);
     }
 

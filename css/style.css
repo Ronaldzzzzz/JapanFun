@@ -151,6 +151,33 @@ body {
     color: var(--accent-blue);
 }
 
+/* 抽選範圍指示器 */
+.pool-indicator {
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+    padding: 6px 0 8px;
+}
+.pool-chip {
+    font-size: 12px; padding: 3px 10px; border-radius: 10px; border: 1px solid;
+}
+.pool-all {
+    border-color: var(--border-accent); color: var(--text-muted);
+    background: transparent;
+}
+.pool-anchor {
+    border-color: var(--accent-red); color: var(--accent-red);
+    background: rgba(255, 107, 107, 0.12); font-weight: 700;
+}
+.pool-neighbor {
+    border-color: rgba(116, 185, 255, 0.35); color: var(--accent-blue);
+    background: rgba(116, 185, 255, 0.07);
+}
+.pool-reset {
+    font-size: 12px; padding: 3px 10px; border-radius: 10px;
+    background: transparent; border: 1px solid var(--border-subtle);
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+}
+.pool-reset:hover { border-color: var(--border-accent); color: var(--text-secondary); }
+
 /* 地區手風琴 */
 .region-group { margin-bottom: 4px; }
 .region-header {
@@ -174,6 +201,16 @@ body {
     padding: 7px 4px 4px 12px;
 }
 .pref-chip { font-size: 13px; padding: 3px 10px; }
+.pref-chip.pref-anchor {
+    background: rgba(255, 107, 107, 0.15);
+    border-color: var(--accent-red) !important;
+    color: var(--accent-red); font-weight: 700;
+}
+.pref-chip.pref-neighbor {
+    background: rgba(116, 185, 255, 0.08);
+    border-color: rgba(116, 185, 255, 0.5);
+    color: var(--accent-blue);
+}
 
 .controls-row { display: flex; gap: 8px; margin-bottom: 8px; }
 #count {
