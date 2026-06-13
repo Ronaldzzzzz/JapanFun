@@ -36,10 +36,10 @@ body {
 }
 .navbar-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-red); }
 .navbar h1 {
-    font-size: 15px; font-weight: 700; letter-spacing: 0.12em;
+    font-size: 17px; font-weight: 700; letter-spacing: 0.12em;
     color: var(--accent-blue); flex: 1;
 }
-.navbar-stats { font-size: 12px; color: var(--text-muted); }
+.navbar-stats { font-size: 14px; color: var(--text-muted); }
 .navbar-stats span { color: var(--accent-blue); font-weight: 600; }
 
 .main-content { display: flex; flex: 1; min-height: 0; }
@@ -55,7 +55,7 @@ body {
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
     padding: 7px 10px;
-    font-size: 11px;
+    font-size: 13px;
     backdrop-filter: blur(4px);
     pointer-events: none;
 }
@@ -65,7 +65,7 @@ body {
     display: flex; flex-direction: column; gap: 14px;
     align-items: center; justify-content: center;
     background: rgba(8, 12, 20, 0.9);
-    color: var(--text-secondary); font-size: 13px;
+    color: var(--text-secondary); font-size: 15px;
     transition: opacity 0.4s;
 }
 #loading-overlay.hidden { opacity: 0; pointer-events: none; }
@@ -81,7 +81,7 @@ body {
 .load-error button {
     margin-top: 12px; padding: 7px 22px;
     background: var(--btn-primary); color: #fff;
-    border: none; border-radius: 6px; font-size: 13px; cursor: pointer;
+    border: none; border-radius: 6px; font-size: 15px; cursor: pointer;
 }
 
 /* 選取高亮發光與 pulse */
@@ -114,24 +114,24 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 .leaflet-tooltip-top.area-tooltip::before { border-top-color: var(--border-accent); }
-.tt-selected { color: var(--accent-red); font-size: 10px; font-weight: 700; margin-bottom: 3px; }
-.tt-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
-.tt-row { font-size: 11px; color: var(--text-secondary); }
+.tt-selected { color: var(--accent-red); font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.tt-name { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+.tt-row { font-size: 13px; color: var(--text-secondary); }
 
 /* ===== 側邊欄 ===== */
 .sidebar {
-    width: 280px; flex: none;
+    width: 300px; flex: none;
     background: var(--bg-primary);
     border-left: 1px solid var(--border-subtle);
     display: flex; flex-direction: column;
     overflow: hidden;
 }
 .sidebar-section { padding: 14px 16px; border-bottom: 1px solid var(--bg-card); flex: none; }
-.label { font-size: 11px; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+.label { font-size: 13px; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .chip {
-    font-size: 11px; padding: 3px 10px; border-radius: 12px;
+    font-size: 13px; padding: 4px 12px; border-radius: 12px;
     background: var(--bg-input);
     border: 1px solid var(--border-subtle);
     color: var(--text-muted);
@@ -151,12 +151,12 @@ body {
     border: 1px solid var(--border-accent);
     border-radius: 5px;
     color: var(--text-secondary);
-    font-size: 14px; padding: 7px 4px;
+    font-size: 16px; padding: 7px 4px;
 }
 .btn-primary {
     flex: 1; border: none; border-radius: 6px; cursor: pointer;
     background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: #fff; font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    color: #fff; font-size: 15px; font-weight: 600; letter-spacing: 0.04em;
     padding: 8px 0;
     transition: filter 0.15s;
 }
@@ -165,7 +165,7 @@ body {
     width: 100%; padding: 7px; border-radius: 5px; cursor: pointer;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    color: var(--text-muted); font-size: 12px;
+    color: var(--text-muted); font-size: 14px;
     transition: all 0.15s;
 }
 .btn-ghost:hover { color: var(--text-secondary); border-color: var(--border-accent); }
@@ -177,8 +177,8 @@ body {
     border-radius: 6px;
     padding: 8px 10px;
 }
-.stat-label { font-size: 10px; color: var(--text-muted); margin-bottom: 3px; }
-.stat-value { font-size: 17px; font-weight: 700; color: var(--accent-blue); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
+.stat-value { font-size: 20px; font-weight: 700; color: var(--accent-blue); }
 
 .results-section { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 #selected-areas {
@@ -188,7 +188,7 @@ body {
 }
 #selected-areas::-webkit-scrollbar { width: 6px; }
 #selected-areas::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
-.empty-hint { color: var(--text-muted); font-size: 12px; text-align: center; margin-top: 24px; }
+.empty-hint { color: var(--text-muted); font-size: 14px; text-align: center; margin-top: 24px; }
 
 .area-card {
     background: var(--bg-secondary);
@@ -200,15 +200,15 @@ body {
 }
 .area-card:hover { background: var(--bg-card); transform: translateX(-2px); }
 .area-card-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-.area-card-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.area-card-badge { font-size: 9px; padding: 1px 7px; border-radius: 9px; border: 1px solid; }
-.area-card-meta { display: flex; gap: 12px; font-size: 10px; color: var(--text-muted); }
+.area-card-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.area-card-badge { font-size: 11px; padding: 2px 8px; border-radius: 9px; border: 1px solid; }
+.area-card-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
 
 /* ===== 通知 ===== */
 .notification {
     position: fixed; top: 60px; right: 16px; z-index: 2000;
     padding: 10px 16px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; color: #fff;
+    font-size: 15px; font-weight: 600; color: #fff;
     max-width: 300px; word-wrap: break-word;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     animation: slideIn 0.3s ease-out;
@@ -229,5 +229,5 @@ body {
         border-left: none;
         border-top: 1px solid var(--border-subtle);
     }
-    .navbar h1 { font-size: 13px; letter-spacing: 0.06em; }
+    .navbar h1 { font-size: 15px; letter-spacing: 0.06em; }
 }
