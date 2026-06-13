@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>東京首都圈隨機地圖選取器</title>
+    <title>日本全國隨機地圖選取器</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,7 +11,7 @@
     <div class="app-container">
         <header class="navbar">
             <span class="navbar-dot"></span>
-            <h1>🗾 東京首都圈隨機選取器</h1>
+            <h1>🗾 日本全國隨機地圖選取器</h1>
             <div class="navbar-stats">總區域：<span id="total-areas">—</span></div>
         </header>
 
@@ -19,11 +19,14 @@
             <div class="map-wrap">
                 <div id="map"></div>
                 <div class="map-legend">
-                    <span style="color:#74b9ff">■ 東京都</span>
-                    <span style="color:#fd79a8">■ 神奈川</span>
-                    <span style="color:#55a3ff">■ 埼玉</span>
-                    <span style="color:#00b894">■ 千葉</span>
-                    <span style="color:#fdcb6e">■ 山梨</span>
+                    <span style="color:#74b9ff">■ 北海道</span>
+                    <span style="color:#a29bfe">■ 東北</span>
+                    <span style="color:#fd79a8">■ 関東</span>
+                    <span style="color:#fdcb6e">■ 中部</span>
+                    <span style="color:#00b894">■ 近畿</span>
+                    <span style="color:#e17055">■ 中国</span>
+                    <span style="color:#55efc4">■ 四国</span>
+                    <span style="color:#ff7675">■ 九州</span>
                 </div>
                 <div id="loading-overlay">
                     <div class="spinner"></div>
@@ -32,9 +35,9 @@
             </div>
 
             <aside class="sidebar">
-                <section class="sidebar-section">
+                <section class="sidebar-section filter-section">
                     <div class="label">篩選縣市</div>
-                    <div class="chips" id="prefecture-chips"></div>
+                    <div id="prefecture-chips"></div>
                 </section>
 
                 <section class="sidebar-section">

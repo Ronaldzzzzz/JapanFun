@@ -1,6 +1,6 @@
 // 資料層：載入並轉換東京首都圈真實行政區邊界 GeoJSON（國土數值情報 N03）
 
-const PREF_CODES = ['11', '12', '13', '14', '19'];
+const PREF_CODES = Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, '0'));
 const GEOJSON_URL = (code) =>
     `https://raw.githubusercontent.com/smartnews-smri/japan-topography/main/data/municipality/geojson/s0010/N03-21_${code}_210101.json`;
 

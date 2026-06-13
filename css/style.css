@@ -120,7 +120,7 @@ body {
 
 /* ===== 側邊欄 ===== */
 .sidebar {
-    width: 300px; flex: none;
+    width: 380px; flex: none;
     background: var(--bg-primary);
     border-left: 1px solid var(--border-subtle);
     display: flex; flex-direction: column;
@@ -129,7 +129,14 @@ body {
 .sidebar-section { padding: 14px 16px; border-bottom: 1px solid var(--bg-card); flex: none; }
 .label { font-size: 15px; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
 
-.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+/* 篩選區：可捲動 */
+.filter-section { flex: none; max-height: 42vh; overflow-y: auto; }
+.filter-section::-webkit-scrollbar { width: 5px; }
+.filter-section::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+#prefecture-chips { display: flex; flex-direction: column; gap: 4px; }
+.all-chip { margin-bottom: 2px; }
 .chip {
     font-size: 15px; padding: 5px 14px; border-radius: 12px;
     background: var(--bg-input);
@@ -143,6 +150,30 @@ body {
     border-color: var(--btn-primary);
     color: var(--accent-blue);
 }
+
+/* 地區手風琴 */
+.region-group { margin-bottom: 4px; }
+.region-header {
+    width: 100%; display: flex; align-items: center; gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 7px 10px;
+    color: var(--text-secondary); font-size: 14px;
+    cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.region-header:hover { background: var(--bg-input); color: var(--text-primary); }
+.region-header.has-selection { color: var(--text-primary); }
+.region-label { flex: 1; font-weight: 600; }
+.region-count { font-size: 12px; }
+.region-arrow { font-size: 10px; color: var(--text-muted); }
+
+.region-prefs {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    padding: 7px 4px 4px 12px;
+}
+.pref-chip { font-size: 13px; padding: 3px 10px; }
 
 .controls-row { display: flex; gap: 8px; margin-bottom: 8px; }
 #count {
