@@ -36,6 +36,7 @@ class TokyoMetroMap {
         this.geoJsonLayer = null;
         this.selectedIds = new Set();
         this.layersById = new Map();
+        this.poolPrefs = null; // null = 全日本；Set<string> = 抽選縣市名稱
         this.init();
     }
 
@@ -62,10 +63,14 @@ class TokyoMetroMap {
     styleFor(feature) {
         const selected = this.selectedIds.has(feature.properties.id);
         if (selected) {
-            return { fillColor: '#ff6b6b', fillOpacity: 0.45, color: '#ff6b6b', weight: 2.5 };
+            return { fillColor: '#ff6b6b', fillOpacity: 0.5, color: '#ff6b6b', weight: 2 };
         }
-        const base = PREFECTURE_COLORS[feature.properties.prefecture] || '#95a5a6';
-        return { fillColor: base, fillOpacity: 0.15, color: base, weight: 1.5 };
+        const inPool = !this.poolPrefs || this.poolPrefs.has(feature.properties.prefecture);
+        if (inPool) {
+            return { fillColor: '#4a90d9', fillOpacity: 0.1, color: '#2d5a8a', weight: 0.8 };
+        }
+        // 範圍外：幾乎隱形，不干擾視線
+        return { fillColor: '#0d1117', fillOpacity: 0.04, color: '#1a2535', weight: 0.3 };
     }
 
     addGeoJsonLayer() {
@@ -90,10 +95,20 @@ class TokyoMetroMap {
             <div class="tt-row">${props.prefecture}｜${props.type}</div>`;
     }
 
+    // 同步抽選範圍至地圖渲染
+    setPool(poolPrefs) {
+        this.poolPrefs = poolPrefs;
+        this.refreshAll();
+    }
+
     onMouseOver(e, feature) {
         const layer = e.target;
         const selected = this.selectedIds.has(feature.properties.id);
-        layer.setStyle({ fillOpacity: selected ? 0.6 : 0.35, weight: 2.5 });
+        const inPool = !this.poolPrefs || this.poolPrefs.has(feature.properties.prefecture);
+        layer.setStyle({
+            fillOpacity: selected ? 0.68 : (inPool ? 0.28 : 0.1),
+            weight: inPool ? 2 : 0.5
+        });
         layer.bringToFront();
         layer.bindTooltip(this.tooltipHtml(feature.properties), {
             permanent: false, direction: 'top', className: 'area-tooltip'

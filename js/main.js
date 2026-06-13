@@ -111,6 +111,14 @@ class TokyoMetroApp {
         }
         wrap.appendChild(indicator);
 
+        // 同步抽選範圍至地圖
+        if (this.map) {
+            const pool = this.anchorPref
+                ? new Set([this.anchorPref, ...neighbors])
+                : null;
+            this.map.setPool(pool);
+        }
+
         // 各地區手風琴（點縣市 chip 設定基地縣）
         REGIONS.forEach((region) => {
             const isAnchorRegion = region.prefs.includes(this.anchorPref);
