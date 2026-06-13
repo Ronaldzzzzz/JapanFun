@@ -81,6 +81,10 @@ class TokyoMetroApp {
 
         const neighbors = this.anchorPref ? (PREF_ADJACENCY[this.anchorPref] || []) : [];
 
+        // 同步重置按鈕狀態
+        const resetBtn = document.getElementById('reset-filter');
+        if (resetBtn) resetBtn.classList.toggle('active', !!this.anchorPref);
+
         // 抽選範圍指示器
         const indicator = document.createElement('div');
         indicator.className = 'pool-indicator';
@@ -173,6 +177,8 @@ class TokyoMetroApp {
             .addEventListener('click', () => this.handleRandomSelect());
         document.getElementById('clear-selection')
             .addEventListener('click', () => this.handleClear());
+        document.getElementById('reset-filter')
+            .addEventListener('click', () => { this.anchorPref = null; this.renderFilter(); });
 
         const countInput = document.getElementById('count');
         countInput.addEventListener('change', () => {
