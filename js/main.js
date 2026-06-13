@@ -11,12 +11,6 @@ const REGIONS = [
     { key: '九州・沖縄', label: '九州・沖縄', prefs: ['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'] }
 ];
 
-function formatPopulation(n) {
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
-    if (n >= 1e3) return Math.round(n / 1e3) + 'K';
-    return String(n);
-}
-
 class TokyoMetroApp {
     constructor(geojsonData) {
         this.activePrefs = new Set();    // 空 = 全日本；有值 = 只抽這些都道府縣
@@ -143,13 +137,6 @@ class TokyoMetroApp {
         const feats = this.map.getSelectedFeatures();
         document.getElementById('selected-count').textContent = feats.length;
 
-        const popSum = feats.reduce((s, f) => s + (f.properties.population || 0), 0);
-        const areaSum = feats.reduce((s, f) => s + (f.properties.area_km2 || 0), 0);
-        document.getElementById('stat-population').textContent =
-            feats.length ? formatPopulation(popSum) : '—';
-        document.getElementById('stat-area').textContent =
-            feats.length ? `${Math.round(areaSum).toLocaleString()} km²` : '—';
-
         const container = document.getElementById('selected-areas');
         container.innerHTML = '';
         if (feats.length === 0) {
@@ -166,10 +153,6 @@ class TokyoMetroApp {
                 <div class="area-card-top">
                     <span class="area-card-name">${p.name}</span>
                     <span class="area-card-badge" style="color:${color};border-color:${color}66;background:${color}1a">${p.prefecture}</span>
-                </div>
-                <div class="area-card-meta">
-                    <span>${p.population != null ? p.population.toLocaleString() + ' 人' : '人口 N/A'}</span>
-                    <span>${p.area_km2} km²</span>
                 </div>`;
             card.addEventListener('click', () => this.map.flyToArea(p.id));
             container.appendChild(card);

@@ -26,32 +26,8 @@ function mergePolygonCoordinates(geometries) {
     return polygons;
 }
 
-// 球面近似計算單一環的面積（平方公尺）
-function ringAreaM2(ring) {
-    const R = 6378137;
-    const rad = (d) => (d * Math.PI) / 180;
-    let total = 0;
-    for (let i = 0; i < ring.length; i++) {
-        const [lon1, lat1] = ring[i];
-        const [lon2, lat2] = ring[(i + 1) % ring.length];
-        total += (rad(lon2) - rad(lon1)) * (2 + Math.sin(rad(lat1)) + Math.sin(rad(lat2)));
-    }
-    return Math.abs((total * R * R) / 2);
-}
-
-// MultiPolygon 面積（km²，1 位小數）：外環加總、內環（洞）扣除
-function multiPolygonAreaKm2(multiCoords) {
-    let m2 = 0;
-    multiCoords.forEach((polygon) => {
-        polygon.forEach((ring, i) => {
-            m2 += (i === 0 ? 1 : -1) * ringAreaM2(ring);
-        });
-    });
-    return Math.round((m2 / 1e6) * 10) / 10;
-}
-
 // 將原始 N03 GeoJSON 轉為應用程式格式：分組合併 + 屬性補齊
-function transformPrefectureData(rawGeoJson, populationTable) {
+function transformPrefectureData(rawGeoJson) {
     const groups = new Map();
     rawGeoJson.features.forEach((f) => {
         const props = f.properties;
@@ -73,9 +49,7 @@ function transformPrefectureData(rawGeoJson, populationTable) {
                 id,
                 name: g.name,
                 prefecture: g.prefecture,
-                type: deriveType(g.name),
-                population: populationTable[g.name] ?? null,
-                area_km2: multiPolygonAreaKm2(coordinates)
+                type: deriveType(g.name)
             },
             geometry: { type: 'MultiPolygon', coordinates }
         });
@@ -89,7 +63,7 @@ async function loadTokyoMetroData() {
     const failed = responses.find((r) => !r.ok);
     if (failed) throw new Error(`GeoJSON 載入失敗：HTTP ${failed.status}`);
     const rawList = await Promise.all(responses.map((r) => r.json()));
-    const features = rawList.flatMap((raw) => transformPrefectureData(raw, POPULATION_DATA));
+    const features = rawList.flatMap((raw) => transformPrefectureData(raw));
     return { type: 'FeatureCollection', features };
 }
 
@@ -102,8 +76,6 @@ if (typeof module !== 'undefined' && module.exports) {
         getUnitName,
         deriveType,
         mergePolygonCoordinates,
-        ringAreaM2,
-        multiPolygonAreaKm2,
         transformPrefectureData
     };
 }

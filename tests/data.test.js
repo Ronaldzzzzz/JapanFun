@@ -4,7 +4,6 @@ const {
     getUnitName,
     deriveType,
     mergePolygonCoordinates,
-    multiPolygonAreaKm2,
     transformPrefectureData
 } = require('../js/data.js');
 
@@ -39,12 +38,6 @@ test('mergePolygonCoordinates：Polygon 與 MultiPolygon 攤平合併', () => {
     assert.deepEqual(merged[0], [ringA]);
 });
 
-test('multiPolygonAreaKm2：赤道附近 0.1°×0.1° 正方形約 123 km²', () => {
-    const square = [[[[0, 0], [0.1, 0], [0.1, 0.1], [0, 0.1], [0, 0]]]];
-    const area = multiPolygonAreaKm2(square);
-    assert.ok(area > 118 && area < 128, `got ${area}`);
-});
-
 test('transformPrefectureData：分組、合併、屬性補齊', () => {
     const ring1 = [[139.5, 35.4], [139.6, 35.4], [139.6, 35.5], [139.5, 35.4]];
     const ring2 = [[139.6, 35.4], [139.7, 35.4], [139.7, 35.5], [139.6, 35.4]];
@@ -58,7 +51,7 @@ test('transformPrefectureData：分組、合併、屬性補齊', () => {
             { type: 'Feature', properties: { N03_001: '東京都', N03_003: null, N03_004: null, N03_007: null }, geometry: { type: 'Polygon', coordinates: [ring3] } }
         ]
     };
-    const features = transformPrefectureData(raw, { '横浜市': 3777000 });
+    const features = transformPrefectureData(raw);
 
     assert.equal(features.length, 2); // 橫濱兩區合併為一、新宿一個、無名 feature 被跳過
 
@@ -66,11 +59,6 @@ test('transformPrefectureData：分組、合併、屬性補齊', () => {
     assert.equal(yokohama.properties.id, '神奈川県横浜市');
     assert.equal(yokohama.properties.prefecture, '神奈川県');
     assert.equal(yokohama.properties.type, '市');
-    assert.equal(yokohama.properties.population, 3777000);
     assert.equal(yokohama.geometry.type, 'MultiPolygon');
     assert.equal(yokohama.geometry.coordinates.length, 2);
-    assert.ok(yokohama.properties.area_km2 > 0);
-
-    const shinjuku = features.find((f) => f.properties.name === '新宿区');
-    assert.equal(shinjuku.properties.population, null); // 查無人口 → null
 });

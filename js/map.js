@@ -84,13 +84,10 @@ class TokyoMetroMap {
 
     tooltipHtml(props) {
         const selected = this.selectedIds.has(props.id);
-        const pop = props.population != null ? props.population.toLocaleString() : 'N/A';
         return `
             ${selected ? '<div class="tt-selected">● 已選取</div>' : ''}
             <div class="tt-name">${props.name}</div>
-            <div class="tt-row">${props.prefecture}｜${props.type}</div>
-            <div class="tt-row">人口：${pop}</div>
-            <div class="tt-row">面積：${props.area_km2} km²</div>`;
+            <div class="tt-row">${props.prefecture}｜${props.type}</div>`;
     }
 
     onMouseOver(e, feature) {
