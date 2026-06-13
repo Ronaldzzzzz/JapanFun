@@ -81,39 +81,14 @@ class TokyoMetroApp {
 
         const neighbors = this.anchorPref ? (PREF_ADJACENCY[this.anchorPref] || []) : [];
 
-        // 同步重置按鈕狀態
+        // 同步重置按鈕狀態與標籤
         const resetBtn = document.getElementById('reset-filter');
-        if (resetBtn) resetBtn.classList.toggle('active', !!this.anchorPref);
-
-        // 抽選範圍指示器
-        const indicator = document.createElement('div');
-        indicator.className = 'pool-indicator';
-
-        if (!this.anchorPref) {
-            const allChip = document.createElement('span');
-            allChip.className = 'pool-chip pool-all';
-            allChip.textContent = '全日本';
-            indicator.appendChild(allChip);
-        } else {
-            const anchorChip = document.createElement('span');
-            anchorChip.className = 'pool-chip pool-anchor';
-            anchorChip.textContent = this.anchorPref;
-            indicator.appendChild(anchorChip);
-
-            neighbors.forEach((p) => {
-                const nc = document.createElement('span');
-                nc.className = 'pool-chip pool-neighbor';
-                nc.textContent = p;
-                indicator.appendChild(nc);
-            });
-
-            const reset = document.createElement('button');
-            reset.className = 'pool-reset';
-            reset.textContent = '全日本';
-            reset.addEventListener('click', () => { this.anchorPref = null; this.renderFilter(); });
-            indicator.appendChild(reset);
+        if (resetBtn) {
+            resetBtn.classList.toggle('active', !!this.anchorPref);
+            resetBtn.textContent = this.anchorPref
+                ? `✕ ${this.anchorPref}`
+                : '初始化';
         }
-        wrap.appendChild(indicator);
 
         // 同步抽選範圍至地圖
         if (this.map) {
