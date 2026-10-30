@@ -67,7 +67,7 @@ const PREF_ADJACENCY = {
 class TokyoMetroApp {
     constructor(geojsonData) {
         this.anchorPref = null;           // null = 全日本；字串 = 基地縣
-        this.includeAnchor = true;        // true = 抽選包含基地縣；false = 僅抽相鄰縣市
+        this.drawScopeMode = 'only-anchor'; // 'only-anchor' (單一基地縣內) | 'with-neighbors' (基地縣＋鄰縣) | 'only-neighbors' (僅抽鄰縣)
         this.includeIslands = false;      // false = 預設排除偏遠離島；true = 納入離島
         this.expandedRegions = new Set();
         this.isControlCollapsed = false;
@@ -170,30 +170,50 @@ class TokyoMetroApp {
         wrap.innerHTML = '';
 
         const neighbors = this.anchorPref ? (PREF_ADJACENCY[this.anchorPref] || []) : [];
-        const effectiveIncludeAnchor = this.includeAnchor || neighbors.length === 0;
+        const hasNeighbors = neighbors.length > 0;
 
         // 同步折疊標題列上的範圍徽章
         const scopeBadge = document.getElementById('filter-scope-badge');
         if (scopeBadge) {
             if (!this.anchorPref) {
                 scopeBadge.textContent = '全日本';
-            } else if (neighbors.length === 0) {
-                scopeBadge.textContent = this.anchorPref;
+            } else if (!hasNeighbors || this.drawScopeMode === 'only-anchor') {
+                scopeBadge.textContent = `🎯 僅 ${this.anchorPref}`;
+            } else if (this.drawScopeMode === 'with-neighbors') {
+                scopeBadge.textContent = `${this.anchorPref}＋鄰縣`;
             } else {
-                scopeBadge.textContent = effectiveIncludeAnchor
-                    ? `${this.anchorPref}＋鄰縣`
-                    : `${this.anchorPref}之鄰縣`;
+                scopeBadge.textContent = `${this.anchorPref}之鄰縣`;
             }
             scopeBadge.classList.toggle('is-anchor', !!this.anchorPref);
         }
 
-        // 同步「包含基地縣」與「排除／包含偏遠離島」按鈕狀態
-        const anchorOptBtn = document.getElementById('toggle-include-anchor');
-        if (anchorOptBtn) {
-            const canExcludeAnchor = !!this.anchorPref && neighbors.length > 0;
-            anchorOptBtn.disabled = !canExcludeAnchor;
-            anchorOptBtn.classList.toggle('active', effectiveIncludeAnchor);
-            anchorOptBtn.textContent = effectiveIncludeAnchor ? '✓ 包含基地縣' : '✕ 僅抽鄰縣';
+        // 同步「抽籤範圍模式」按鈕文字與狀態
+        const scopeBtn = document.getElementById('toggle-draw-scope');
+        if (scopeBtn) {
+            if (!this.anchorPref) {
+                scopeBtn.disabled = true;
+                scopeBtn.classList.remove('active');
+                scopeBtn.textContent = '🌏 全日本抽選';
+                scopeBtn.title = '請先在下方點選一個基地縣市以鎖定範圍';
+            } else if (!hasNeighbors) {
+                scopeBtn.disabled = true;
+                scopeBtn.classList.add('active');
+                scopeBtn.textContent = `🎯 僅限 ${this.anchorPref}`;
+                scopeBtn.title = '該行政區無陸地接壤鄰縣，僅限單一縣內抽選';
+            } else {
+                scopeBtn.disabled = false;
+                scopeBtn.classList.add('active');
+                if (this.drawScopeMode === 'only-anchor') {
+                    scopeBtn.textContent = `🎯 僅限 ${this.anchorPref}`;
+                    scopeBtn.title = '目前模式：僅限基地縣內隨機抽選（點選切換為包含鄰縣）';
+                } else if (this.drawScopeMode === 'with-neighbors') {
+                    scopeBtn.textContent = '🌐 基地縣＋鄰縣';
+                    scopeBtn.title = '目前模式：基地縣與周圍接壤縣市一同抽選（點選切換為僅抽鄰縣）';
+                } else {
+                    scopeBtn.textContent = '🏔️ 僅抽相鄰周邊';
+                    scopeBtn.title = '目前模式：僅隨機抽選周邊相鄰縣市（點選切換回僅限基地縣）';
+                }
+            }
         }
 
         const islandOptBtn = document.getElementById('toggle-include-islands');
@@ -213,9 +233,16 @@ class TokyoMetroApp {
 
         // 同步抽選範圍至地圖
         if (this.map) {
-            const pool = this.anchorPref
-                ? new Set(effectiveIncludeAnchor ? [this.anchorPref, ...neighbors] : neighbors)
-                : null;
+            let pool = null;
+            if (this.anchorPref) {
+                if (!hasNeighbors || this.drawScopeMode === 'only-anchor') {
+                    pool = new Set([this.anchorPref]);
+                } else if (this.drawScopeMode === 'with-neighbors') {
+                    pool = new Set([this.anchorPref, ...neighbors]);
+                } else {
+                    pool = new Set(neighbors);
+                }
+            }
             this.map.setPool(pool, this.anchorPref, { includeIslands: this.includeIslands });
             document.getElementById('total-areas').textContent = this.poolIds().length;
         }
@@ -309,9 +336,20 @@ class TokyoMetroApp {
         document.getElementById('toggle-control-panel')
             .addEventListener('click', () => this.setControlCollapsed(!this.isControlCollapsed));
 
-        document.getElementById('toggle-include-anchor')
+        document.getElementById('toggle-draw-scope')
             ?.addEventListener('click', () => {
-                this.includeAnchor = !this.includeAnchor;
+                if (!this.anchorPref) return;
+                const neighbors = PREF_ADJACENCY[this.anchorPref] || [];
+                if (neighbors.length === 0) return;
+
+                // 循環三種模式：'only-anchor' -> 'with-neighbors' -> 'only-neighbors' -> 'only-anchor'
+                if (this.drawScopeMode === 'only-anchor') {
+                    this.drawScopeMode = 'with-neighbors';
+                } else if (this.drawScopeMode === 'with-neighbors') {
+                    this.drawScopeMode = 'only-neighbors';
+                } else {
+                    this.drawScopeMode = 'only-anchor';
+                }
                 this.renderFilter();
             });
         document.getElementById('toggle-include-islands')
@@ -345,13 +383,21 @@ class TokyoMetroApp {
         window.addEventListener('resize', () => this.updateLeaderLines());
     }
 
-    // 依基地縣、是否包含基地縣、是否包含偏遠離島回傳目前可抽選的 feature id 池
+    // 依基地縣、抽籤模式、是否包含偏遠離島回傳目前可抽選的 feature id 池
     poolIds() {
         const neighbors = this.anchorPref ? (PREF_ADJACENCY[this.anchorPref] || []) : [];
-        const effectiveIncludeAnchor = this.includeAnchor || neighbors.length === 0;
-        const pool = this.anchorPref
-            ? new Set(effectiveIncludeAnchor ? [this.anchorPref, ...neighbors] : neighbors)
-            : null;
+        const hasNeighbors = neighbors.length > 0;
+        let pool = null;
+
+        if (this.anchorPref) {
+            if (!hasNeighbors || this.drawScopeMode === 'only-anchor') {
+                pool = new Set([this.anchorPref]);
+            } else if (this.drawScopeMode === 'with-neighbors') {
+                pool = new Set([this.anchorPref, ...neighbors]);
+            } else {
+                pool = new Set(neighbors);
+            }
+        }
 
         return this.map.getAllFeatures()
             .filter((f) => {
@@ -479,6 +525,12 @@ class TokyoMetroApp {
         const mainContent = document.querySelector('.main-content');
         const listEl = document.getElementById('selected-areas');
         if (!svg || !mainContent || !listEl || !this.map) return;
+
+        // 手機版（螢幕寬度 <= 768px）面板橫跨全螢幕，直接隱藏 SVG 虛線，改由卡片點擊聚焦放大提示
+        if (window.innerWidth <= 768) {
+            svg.innerHTML = '';
+            return;
+        }
 
         const mainRect = mainContent.getBoundingClientRect();
         const listRect = listEl.getBoundingClientRect();

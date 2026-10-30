@@ -1106,6 +1106,11 @@ body {
 
 /* ===== 響應式（手機版） ===== */
 @media (max-width: 768px) {
+    /* 手機版隱藏容易遮蔽視野與交錯的虛線 */
+    .leader-lines-svg {
+        display: none !important;
+    }
+
     .floating-right {
         top: 10px;
         right: 10px;
@@ -1116,6 +1121,12 @@ body {
     }
     .results-panel {
         max-height: 34vh;
+    }
+    .results-subhint {
+        font-size: 11px;
+    }
+    .results-subhint::after {
+        content: " (自動飛至並突顯)";
     }
     .info-panel {
         top: 10px;
