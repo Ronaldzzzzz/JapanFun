@@ -92,6 +92,7 @@ class TokyoMetroApp {
 
         this.renderFilter();
         this.bindEvents();
+        this.initGuideModal();
         document.getElementById('total-areas').textContent = geojsonData.features.length;
         this.renderSidebar();
         this.infoPanel.store.syncCountsAsync().then((ok) => {
@@ -331,6 +332,11 @@ class TokyoMetroApp {
         const themeBtn = document.getElementById('theme-toggle');
         if (themeBtn) {
             themeBtn.addEventListener('click', () => this.toggleTheme());
+        }
+
+        const guideBtn = document.getElementById('guide-toggle');
+        if (guideBtn) {
+            guideBtn.addEventListener('click', () => this.openGuideModal());
         }
 
         document.getElementById('toggle-control-panel')
@@ -577,6 +583,152 @@ class TokyoMetroApp {
             dot.setAttribute('class', dotClass);
             svg.appendChild(dot);
         });
+    }
+
+    initGuideModal() {
+        this.tourCurrentStep = 0;
+        this.tourSteps = [
+            {
+                targetSelector: '.popular-prefs-box',
+                title: '📍 步驟 1：選擇基地縣市',
+                desc: '點擊此處的<strong>熱門基地標籤</strong>（例如東京都、大阪府），或展開下方地區選單挑選任一縣市。若不選取，預設為「全日本」大範圍抽選。'
+            },
+            {
+                targetSelector: '.draw-options-row',
+                title: '🎯 步驟 2：設定抽籤範圍與離島',
+                desc: '點擊可切換<strong>「🎯 僅限基地縣」</strong>（單一縣內選取）或<strong>「🌐 基地＋鄰縣」</strong>，並可自由排除或納入需要搭機搭船的偏遠離島。'
+            },
+            {
+                targetSelector: '.controls-row',
+                title: '🎲 步驟 3：輸入數量並隨機選取',
+                desc: '設定想要隨機抽選的景點數量（1～50），按下<strong>「隨機選取」</strong>按鈕，地圖就會開始跳動輪盤動畫並鎖定命中地點！'
+            },
+            {
+                targetSelector: '#results-panel',
+                title: '📋 步驟 4：查看結果與互動',
+                desc: '選中的區域會排列在此清單中。<strong>點擊任一卡片</strong>，地圖會自動飛至該行政區中心，並在左側展開 Google Maps、景點美食與遊客照片牆！'
+            }
+        ];
+
+        const overlay = document.getElementById('tour-overlay');
+        const skipBtn = document.getElementById('tour-skip-btn');
+        const prevBtn = document.getElementById('tour-prev-btn');
+        const nextBtn = document.getElementById('tour-next-btn');
+
+        if (!overlay) return;
+
+        if (skipBtn) skipBtn.addEventListener('click', () => this.endTour());
+        if (prevBtn) prevBtn.addEventListener('click', () => this.prevTourStep());
+        if (nextBtn) nextBtn.addEventListener('click', () => this.nextTourStep());
+
+        window.addEventListener('resize', () => {
+            if (!overlay.classList.contains('hidden')) {
+                this.renderTourStep(this.tourCurrentStep);
+            }
+        });
+
+        // 首次造訪自動啟動高亮導覽（使用者完成或跳過後寫入 localStorage）
+        const dismissed = typeof localStorage !== 'undefined' && localStorage.getItem('japanfun_tour_dismissed_v1_1') === 'true';
+        if (!dismissed) {
+            setTimeout(() => this.startTour(), 750);
+        }
+    }
+
+    startTour() {
+        // 先展開控制面板，確保所有導覽元素可見
+        this.setControlCollapsed(false);
+        this.tourCurrentStep = 0;
+        const overlay = document.getElementById('tour-overlay');
+        if (overlay) overlay.classList.remove('hidden');
+        setTimeout(() => this.renderTourStep(0), 100);
+    }
+
+    endTour() {
+        const overlay = document.getElementById('tour-overlay');
+        if (overlay) overlay.classList.add('hidden');
+        document.querySelectorAll('.tour-highlight-active').forEach((el) => {
+            el.classList.remove('tour-highlight-active');
+        });
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('japanfun_tour_dismissed_v1_1', 'true');
+        }
+    }
+
+    prevTourStep() {
+        if (this.tourCurrentStep > 0) {
+            this.tourCurrentStep -= 1;
+            this.renderTourStep(this.tourCurrentStep);
+        }
+    }
+
+    nextTourStep() {
+        if (this.tourCurrentStep < this.tourSteps.length - 1) {
+            this.tourCurrentStep += 1;
+            this.renderTourStep(this.tourCurrentStep);
+        } else {
+            this.endTour();
+            this.notify('導覽完成！隨時點選頂部「🎯 操作導覽」可再次複習。', 'success');
+        }
+    }
+
+    renderTourStep(stepIndex) {
+        const step = this.tourSteps[stepIndex];
+        if (!step) return;
+
+        const targetEl = document.querySelector(step.targetSelector);
+        const cutout = document.getElementById('tour-mask-cutout');
+        const popover = document.getElementById('tour-popover');
+        const badge = document.getElementById('tour-step-badge');
+        const titleEl = document.getElementById('tour-step-title');
+        const descEl = document.getElementById('tour-step-desc');
+        const prevBtn = document.getElementById('tour-prev-btn');
+        const nextBtn = document.getElementById('tour-next-btn');
+
+        if (!targetEl || !popover || !cutout) return;
+
+        // 移除先前的 active outline
+        document.querySelectorAll('.tour-highlight-active').forEach((el) => {
+            el.classList.remove('tour-highlight-active');
+        });
+        targetEl.classList.add('tour-highlight-active');
+
+        // 計算目標元素的精確視窗座標
+        const rect = targetEl.getBoundingClientRect();
+        const padding = 6;
+        const cutX = Math.max(0, rect.left - padding);
+        const cutY = Math.max(0, rect.top - padding);
+        const cutW = rect.width + padding * 2;
+        const cutH = rect.height + padding * 2;
+
+        cutout.setAttribute('x', String(cutX));
+        cutout.setAttribute('y', String(cutY));
+        cutout.setAttribute('width', String(cutW));
+        cutout.setAttribute('height', String(cutH));
+
+        // 更新文字
+        if (badge) badge.textContent = `步驟 ${stepIndex + 1} / ${this.tourSteps.length}`;
+        if (titleEl) titleEl.innerHTML = step.title;
+        if (descEl) descEl.innerHTML = step.desc;
+
+        if (prevBtn) prevBtn.disabled = stepIndex === 0;
+        if (nextBtn) nextBtn.textContent = stepIndex === this.tourSteps.length - 1 ? '完成導覽 🎉' : '下一步 ➔';
+
+        // 定位說明 Popover：在電腦版盡量放在目標左側；手機版由 CSS 底部全寬固定
+        if (window.innerWidth > 768) {
+            const popW = 320;
+            let popLeft = rect.left - popW - 16;
+            if (popLeft < 16) {
+                // 若左側空間不足則放下方或右方
+                popLeft = Math.max(16, rect.left);
+            }
+            let popTop = Math.max(20, Math.min(window.innerHeight - 240, rect.top));
+            popover.style.top = `${popTop}px`;
+            popover.style.left = `${popLeft}px`;
+        }
+    }
+
+    openGuideModal() {
+        this.startTour();
     }
 
     notify(message, type = 'info') {

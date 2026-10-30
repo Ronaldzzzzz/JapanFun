@@ -66,19 +66,44 @@ body {
 /* ===== Navbar ===== */
 .navbar {
     height: 48px; flex: none;
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
     padding: 0 18px;
     background: var(--bg-navbar);
     border-bottom: 1px solid var(--border-subtle);
     z-index: 700;
 }
-.navbar-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-red); }
 .navbar h1 {
     font-size: 17px; font-weight: 700; letter-spacing: 0.1em;
-    color: var(--text-primary); flex: 1;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: none;
 }
 .navbar-stats { font-size: 14px; color: var(--text-muted); }
 .navbar-stats span { color: var(--accent-blue); font-weight: 700; }
+
+.btn-guide-toggle {
+    padding: 5px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--accent-blue);
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--accent-blue);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-guide-toggle:hover {
+    background: rgba(37, 99, 235, 0.25);
+    border-color: var(--accent-blue);
+}
 
 .btn-theme-toggle {
     padding: 5px 12px;
@@ -1104,11 +1129,213 @@ body {
 @keyframes toastIn { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 @keyframes toastOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -20px); opacity: 0; } }
 
+/* ===== 互動式引導聚焦遮罩（Spotlight Tour） ===== */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2900;
+    pointer-events: auto;
+    animation: fadeInTour 0.25s ease-out;
+}
+.tour-overlay.hidden {
+    display: none !important;
+}
+@keyframes fadeInTour {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tour-spotlight-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+#tour-mask-cutout {
+    transition: x 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                y 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 伴隨高亮元素的外圈呼吸脈衝發光邊框 */
+.tour-highlight-active {
+    position: relative !important;
+    z-index: 2905 !important;
+    outline: 3px solid var(--accent-anchor) !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 24px rgba(255, 209, 102, 0.75) !important;
+    border-radius: 10px !important;
+    animation: tourPulse 1.8s infinite ease-in-out !important;
+    transition: outline 0.2s, box-shadow 0.2s !important;
+}
+@keyframes tourPulse {
+    0%, 100% { outline-color: var(--accent-anchor); box-shadow: 0 0 16px rgba(255, 209, 102, 0.55); }
+    50% { outline-color: var(--accent-red); box-shadow: 0 0 32px rgba(225, 29, 72, 0.85); }
+}
+
+/* 導覽氣泡卡片 Popover */
+.tour-popover {
+    position: absolute;
+    z-index: 2910;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-accent);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tour-popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.tour-step-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-anchor);
+    background: rgba(217, 119, 6, 0.15);
+    border: 1px solid rgba(217, 119, 6, 0.35);
+    padding: 2px 9px;
+    border-radius: 12px;
+}
+.tour-skip-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 15px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.tour-skip-btn:hover {
+    color: var(--accent-red);
+    background: rgba(225, 29, 72, 0.12);
+}
+
+.tour-step-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tour-step-desc {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+.tour-step-desc strong {
+    color: var(--accent-anchor);
+}
+
+.tour-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.tour-btn {
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    border: none;
+}
+.tour-btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+.tour-btn-secondary:hover:not(:disabled) {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+.tour-btn-secondary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+.tour-btn-primary {
+    background: var(--btn-primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+.tour-btn-primary:hover {
+    background: #2563eb;
+}
+
 /* ===== 響應式（手機版） ===== */
 @media (max-width: 768px) {
     /* 手機版隱藏容易遮蔽視野與交錯的虛線 */
     .leader-lines-svg {
         display: none !important;
+    }
+
+    .navbar {
+        padding: 0 10px;
+        gap: 8px;
+    }
+    .navbar-title {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 15px !important;
+        letter-spacing: 0.02em !important;
+        min-width: 0;
+        flex: 1;
+    }
+    .title-sub {
+        display: none; /* 手機版隱藏過長副標題，僅保留精準的「⛩️ JapanFun」 */
+    }
+    .navbar-actions {
+        gap: 6px;
+    }
+    .navbar-stats {
+        display: none; /* 手機頂部精簡空間 */
+    }
+    .btn-guide-toggle {
+        padding: 5px 9px;
+        font-size: 12px;
+        white-space: nowrap;
+        border-radius: 14px;
+    }
+    .btn-theme-toggle {
+        padding: 5px 8px;
+        font-size: 12px;
+        white-space: nowrap;
+        border-radius: 14px;
+    }
+
+    /* 手機版導覽氣泡固定居中或緊貼下緣，確保單手好操作 */
+    .tour-popover {
+        position: fixed !important;
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 16px !important;
+        top: auto !important;
+        width: auto !important;
+        transform: none !important;
+        max-width: none !important;
+        z-index: 2950;
     }
 
     .floating-right {
@@ -1136,5 +1363,4 @@ body {
         width: auto;
         z-index: 600;
     }
-    .navbar h1 { font-size: 15px; letter-spacing: 0.06em; }
 }
