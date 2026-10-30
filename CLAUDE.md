@@ -25,13 +25,13 @@ Then open `http://localhost:8000` in a browser. Opening `index.html` directly as
 
 ## Architecture
 
-The app is three plain ES6 classes loaded via `<script>` tags in order — no bundler, no modules:
+The app is built with pure Vanilla ES6 modules loaded via `<script>` tags (zero bundler required), paired with optional Cloudflare Pages Functions for backend storage:
 
-1. **`js/data.js`** — declares the global `tokyoMetroData` GeoJSON FeatureCollection. Each feature has `properties` (`name`, `prefecture`, `type`, `population`, `area_km2`) and a `geometry.coordinates` array stored as `[lat, lng]` (non-standard order).
-
-2. **`js/map.js`** — `TokyoMetroMap` wraps Leaflet.js. On init it calls `normalizeGeoJsonCoordinates()` to swap any `[lat, lng]` pairs where the second value exceeds ±90 into proper `[lng, lat]` GeoJSON order before passing to `L.geoJSON()`. Maintains `selectedAreas` (Set of area name strings) and `areaLayers` (Map of name → Leaflet layer). Prefecture colors are hardcoded in `getPrefectureColor()`.
-
-3. **`js/main.js`** — `TokyoMetroApp` owns the UI: button bindings, keyboard shortcuts (`Ctrl/Cmd+R` random select, `Ctrl/Cmd+C` clear), input validation (1–50), and toast notifications. Delegates all map/selection logic to its `TokyoMetroMap` instance. The global `window.app` is exposed for browser console debugging.
+1. **`js/data.js`** — fetches N03 administrative GeoJSONs for Japan's 47 prefectures, combines wards of designated cities into single units, identifies remote island municipalities (`isRemoteIsland`), and handles special areas (like `千葉県所属未定地`).
+2. **`js/map.js`** — `TokyoMetroMap` wraps Leaflet.js with light/dark theme tile switching, dynamic prefecture outer border rendering (`prefBorderPane`), non-interactive prefecture watermark labels, roulette deceleration animation, leader line anchor points, and selection highlighting.
+3. **`js/info-panel.js`** — `AreaInfoPanel` manages the left-side sliding panel with Google Maps exploration buttons, Wikipedia bilingual summaries (with curated history for special areas like `千葉県所属未定地`), and community photos/notes (`CommunityStore` with Cloudflare D1/R2 API + localStorage fallback).
+4. **`js/main.js`** — `TokyoMetroApp` coordinates the floating panels, anchor prefecture & neighbor pool filtering, popular base chips, include-anchor & exclude-islands options, north-to-south leader line rendering (`#leader-lines-svg`), and theme toggling.
+5. **`functions/api/`** — Cloudflare Pages Functions (`/api/posts`, `/api/photos/[key]`) backed by Cloudflare D1 SQLite (`schema.sql`) and R2 object storage.
 
 ## Data
 

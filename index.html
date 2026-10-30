@@ -13,14 +13,20 @@
             <span class="navbar-dot"></span>
             <h1>🗾 日本全國隨機地圖選取器</h1>
             <div class="navbar-stats">總區域：<span id="total-areas">—</span></div>
+            <button id="theme-toggle" class="btn-theme-toggle" type="button" title="切換淺色／深色主題">🌙 深色</button>
         </header>
 
         <div class="main-content">
             <div class="map-wrap">
                 <div id="map"></div>
+                <div id="roulette-banner" class="roulette-banner hidden" aria-live="polite">
+                    <span class="roulette-icon">🎲</span>
+                    <span id="roulette-text">準備抽選⋯</span>
+                </div>
                 <div class="map-legend">
-                    <span style="color:#4a90d9">■ 抽選範圍</span>
-                    <span style="color:#ff6b6b">■ 已選取</span>
+                    <span class="legend-anchor">▬ 基地縣界</span>
+                    <span class="legend-pool">▬ 鄰縣／抽選範圍</span>
+                    <span class="legend-selected">■ 已選取</span>
                 </div>
                 <div id="loading-overlay">
                     <div class="spinner"></div>
@@ -28,35 +34,64 @@
                 </div>
             </div>
 
-            <aside class="sidebar">
-                <section class="sidebar-section filter-section">
-                    <div class="section-header">
-                        <span class="label">篩選縣市</span>
-                        <button id="reset-filter" class="btn-reset">全日本</button>
+            <!-- 指示輔助虛線 SVG 圖層（連接右側已選卡片與地圖區域中心） -->
+            <svg id="leader-lines-svg" class="leader-lines-svg" aria-hidden="true"></svg>
+
+            <!-- 左側懸浮：區域資訊區塊（點選區域時顯示） -->
+            <aside id="info-panel" class="floating-panel info-panel hidden" aria-label="區域資訊區塊"></aside>
+
+            <!-- 右側懸浮：上下分割為「隨機功能區」與「已選取區域清單」 -->
+            <div class="floating-right">
+                <section id="control-panel" class="floating-panel control-panel">
+                    <button id="toggle-control-panel" class="panel-collapse-header" type="button" aria-expanded="true">
+                        <span class="collapse-title">🎲 隨機選取設定</span>
+                        <span id="filter-scope-badge" class="scope-badge">全日本</span>
+                        <span id="control-collapse-arrow" class="collapse-arrow">▲</span>
+                    </button>
+
+                    <div id="control-panel-body" class="panel-body">
+                        <div class="control-subblock filter-section">
+                            <div class="section-header">
+                                <span class="label">篩選縣市（點選設定基地縣）</span>
+                                <button id="reset-filter" class="btn-reset" type="button">初始化</button>
+                            </div>
+                            <div id="prefecture-chips"></div>
+                        </div>
+
+                        <div class="control-subblock action-section">
+                            <div class="label">抽選條件與數量</div>
+                            <div class="draw-options-row">
+                                <button id="toggle-include-anchor" class="option-pill active" type="button" title="抽選時是否納入基地縣本身的行政區">
+                                    ✓ 包含基地縣
+                                </button>
+                                <button id="toggle-include-islands" class="option-pill" type="button" title="是否納入小笠原諸島、伊豆諸島等需乘船／搭機之偏遠離島">
+                                    ✕ 排除偏遠離島
+                                </button>
+                            </div>
+                            <div class="controls-row">
+                                <input type="number" id="count" min="1" max="50" value="5">
+                                <button id="random-select" class="btn-primary" type="button">隨機選取</button>
+                            </div>
+                            <button id="clear-selection" class="btn-ghost" type="button">清除選取</button>
+                        </div>
                     </div>
-                    <div id="prefecture-chips"></div>
                 </section>
 
-                <section class="sidebar-section">
-                    <div class="label">選取數量</div>
-                    <div class="controls-row">
-                        <input type="number" id="count" min="1" max="50" value="5">
-                        <button id="random-select" class="btn-primary">隨機選取</button>
+                <section id="results-panel" class="floating-panel results-panel">
+                    <div class="results-header">
+                        <span class="label">已選取 <strong id="selected-count">0</strong> 個區域</span>
+                        <span class="results-subhint">點選注目／再點取消</span>
                     </div>
-                    <button id="clear-selection" class="btn-ghost">清除選取</button>
-                </section>
-
-<section class="sidebar-section results-section">
-                    <div class="label">已選取 <span id="selected-count">0</span> 個區域</div>
                     <div id="selected-areas"></div>
                 </section>
-            </aside>
+            </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/data.js"></script>
     <script src="js/map.js"></script>
+    <script src="js/info-panel.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
