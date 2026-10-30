@@ -1,14 +1,14 @@
-name = "tokyofun"
+name = "japanfun"
 pages_build_output_dir = "."
 compatibility_date = "2024-11-01"
 
-# Cloudflare D1 資料庫綁定（建立後請將 database_id 替換為你的實際 ID）
+# Cloudflare D1 資料庫綁定
 [[d1_databases]]
 binding = "DB"
-database_name = "tokyofun-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_name = "japanfun-db"
+database_id = "2a721d9c-030c-4d20-900b-194f717f209d"
 
 # Cloudflare R2 圖床儲存桶綁定
 [[r2_buckets]]
 binding = "PHOTOS_BUCKET"
-bucket_name = "tokyofun-photos"
+bucket_name = "japanfun-photos"
