@@ -25,7 +25,7 @@ export async function onRequestGet(context) {
 
     if (areaId) {
         const { results } = await env.DB.prepare(
-            'SELECT id, area_id AS areaId, author, visit_date AS visitDate, comment, photo_key AS photoKey, created_at AS createdAt FROM posts WHERE area_id = ? ORDER BY created_at DESC LIMIT 50'
+            "SELECT id, area_id AS areaId, author, visit_date AS visitDate, comment, photo_key AS photoKey, created_at AS createdAt, status FROM posts WHERE area_id = ? AND status = 'approved' ORDER BY created_at DESC LIMIT 50"
         ).bind(areaId).all();
 
         const posts = (results || []).map((row) => ({
@@ -35,9 +35,9 @@ export async function onRequestGet(context) {
         return Response.json({ posts });
     }
 
-    // 未指定 areaId 時，回傳各市町村的投稿數量統計（供右側清單顯示 📷 數量）
+    // 未指定 areaId 時，回傳各市町村已通過審核的投稿數量統計（供右側清單顯示 📷 數量）
     const { results } = await env.DB.prepare(
-        'SELECT area_id AS areaId, COUNT(*) AS count FROM posts GROUP BY area_id'
+        "SELECT area_id AS areaId, COUNT(*) AS count FROM posts WHERE status = 'approved' GROUP BY area_id"
     ).all();
     return Response.json({ counts: results || [] });
 }
@@ -83,9 +83,10 @@ export async function onRequestPost(context) {
         });
     }
 
+    // 方案 B：先審後發，預設存入 'pending' 狀態
     await env.DB.prepare(
-        'INSERT INTO posts (id, area_id, author, visit_date, comment, photo_key, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, areaId, author, visitDate, comment, photoKey, createdAt).run();
+        'INSERT INTO posts (id, area_id, author, visit_date, comment, photo_key, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(id, areaId, author, visitDate, comment, photoKey, createdAt, 'pending').run();
 
     return Response.json({
         post: {
@@ -96,7 +97,8 @@ export async function onRequestPost(context) {
             comment,
             photoKey,
             photoDataUrl: photoKey ? `/api/photos/${encodeURIComponent(photoKey)}` : null,
-            createdAt
+            createdAt,
+            status: 'pending'
         }
     }, { status: 201 });
 }
@@ -105,6 +107,13 @@ export async function onRequestDelete(context) {
     const { request, env } = context;
     if (!env.DB) {
         return Response.json({ error: 'D1 binding not configured' }, { status: 503 });
+    }
+
+    // 刪除權限校驗：僅管理員或帶有正確金鑰可刪除
+    const adminKey = request.headers.get('x-admin-key') || new URL(request.url).searchParams.get('key');
+    const validKey = env.ADMIN_SECRET || 'japanfun888';
+    if (!adminKey || adminKey !== validKey) {
+        return Response.json({ error: '未經授權的操作' }, { status: 401 });
     }
 
     const url = new URL(request.url);

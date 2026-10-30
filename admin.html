@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JapanFun 旅人照片與心得審核後台</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛩️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #faf7f2;
+            --bg-card: rgba(255, 255, 255, 0.94);
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --accent-red: #d63031;
+            --accent-green: #00b894;
+            --accent-blue: #0984e3;
+            --border-color: #e9ecef;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.06);
+            --font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-nav {
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .admin-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-link:hover { text-decoration: underline; }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid #dfe6e9;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            color: var(--text-sub);
+            transition: all 0.2s;
+        }
+        .btn-logout:hover { background: #f1f2f6; color: var(--accent-red); }
+
+        .admin-container {
+            max-width: 1080px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+            flex: 1;
+        }
+
+        /* 登入視窗 */
+        .login-wrap {
+            max-width: 420px;
+            margin: 80px auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 36px 30px;
+            box-shadow: var(--shadow-card);
+            text-align: center;
+        }
+
+        .login-icon { font-size: 3rem; margin-bottom: 12px; }
+        .login-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 8px; }
+        .login-desc { font-size: 0.88rem; color: var(--text-sub); margin-bottom: 24px; line-height: 1.5; }
+        .login-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #dcdde1;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .login-input:focus { border-color: var(--accent-red); }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-red);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 12px rgba(214, 48, 49, 0.25);
+            transition: opacity 0.2s;
+        }
+        .btn-login:hover { opacity: 0.9; }
+
+        /* 分頁切換 */
+        .admin-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 18px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            color: var(--text-sub);
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: var(--accent-red);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .tab-badge {
+            background: #dfe6e9;
+            color: #2d3436;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+        .tab-btn.active .tab-badge {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        /* 貼文列表卡片網格 */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .admin-post-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .admin-post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(0,0,0,0.09);
+        }
+
+        .card-photo-wrap {
+            width: 100%;
+            height: 200px;
+            background: #f1f2f6;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .card-photo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .card-photo-wrap:hover img { transform: scale(1.04); }
+
+        .card-no-photo {
+            width: 100%;
+            height: 80px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b2bec3;
+            font-size: 0.85rem;
+        }
+
+        .card-content {
+            padding: 16px 18px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-badges {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .area-tag {
+            background: #ffeaa7;
+            color: #d35400;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        .status-tag {
+            font-size: 0.78rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+
+        .card-meta {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-comment {
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 9px 0;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: opacity 0.2s;
+        }
+        .btn-approve { background: var(--accent-green); color: #fff; }
+        .btn-reject { background: #f1f2f6; color: var(--accent-red); }
+        .btn-reject:hover { background: #ffebee; }
+        .btn-action:hover { opacity: 0.88; }
+
+        /* 空狀態 */
+        .empty-wrap {
+            text-align: center;
+            padding: 80px 20px;
+            background: #fff;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        .empty-icon { font-size: 3.5rem; margin-bottom: 14px; }
+        .empty-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
+        .empty-sub { font-size: 0.88rem; color: var(--text-sub); }
+
+        /* Lightbox 彈出層 */
+        .lightbox-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .lightbox-modal.hidden { display: none; }
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .lightbox-content img {
+            display: block;
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Toast 提示 */
+        .toast-msg {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3436;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 2000;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            animation: fadeIn 0.25s ease;
+        }
+        .toast-msg.hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="admin-brand">
+            <span>⛩️</span>
+            <span>JapanFun 管理後台</span>
+        </div>
+        <div class="admin-nav-actions">
+            <a href="/" target="_blank" class="btn-link">開啟前台地圖 ↗</a>
+            <button id="btn-logout" class="btn-logout hidden">登出</button>
+        </div>
+    </nav>
+
+    <main class="admin-container">
+        <!-- 登入卡片 -->
+        <div id="login-view" class="login-wrap">
+            <div class="login-icon">🔐</div>
+            <h1 class="login-title">管理員身份驗證</h1>
+            <p class="login-desc">請輸入管理金鑰（Admin Key）以進入審核後台，核准或駁回旅人上傳的照片與心得。</p>
+            <form id="login-form">
+                <input type="password" id="admin-key-input" class="login-input" placeholder="請輸入管理員金鑰" required autocomplete="current-password">
+                <button type="submit" class="btn-login">驗證並登入</button>
+            </form>
+        </div>
+
+        <!-- 主管理介面 -->
+        <div id="dashboard-view" class="hidden">
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="pending" id="tab-pending">
+                    <span>⏳ 待審核投稿</span>
+                    <span class="tab-badge" id="badge-pending">0</span>
+                </button>
+                <button class="tab-btn" data-tab="approved" id="tab-approved">
+                    <span>✅ 已發佈公開</span>
+                    <span class="tab-badge" id="badge-approved">0</span>
+                </button>
+            </div>
+
+            <div id="posts-container" class="posts-grid">
+                <!-- 動態注入貼文列表 -->
+            </div>
+
+            <div id="empty-state" class="empty-wrap hidden">
+                <div class="empty-icon">🍵</div>
+                <h3 class="empty-title">目前沒有待審核的投稿</h3>
+                <p class="empty-sub">所有旅人的照片與心得皆已完成審查，辛苦了！</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 圖片燈箱 -->
+    <div id="lightbox-modal" class="lightbox-modal hidden">
+        <div class="lightbox-content">
+            <button id="lightbox-close" class="lightbox-close">✕</button>
+            <img id="lightbox-img" src="" alt="高解析大圖">
+        </div>
+    </div>
+
+    <div id="toast" class="toast-msg hidden"></div>
+
+    <script>
+        const STORAGE_KEY = 'japanfun_admin_secret_key';
+        let currentAdminKey = localStorage.getItem(STORAGE_KEY) || '';
+        let currentTab = 'pending';
+        let currentPosts = [];
+
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+        const adminKeyInput = document.getElementById('admin-key-input');
+        const btnLogout = document.getElementById('btn-logout');
+        const postsContainer = document.getElementById('posts-container');
+        const emptyState = document.getElementById('empty-state');
+        const tabPending = document.getElementById('tab-pending');
+        const tabApproved = document.getElementById('tab-approved');
+        const badgePending = document.getElementById('badge-pending');
+        const badgeApproved = document.getElementById('badge-approved');
+        const lightboxModal = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const toastEl = document.getElementById('toast');
+
+        function showToast(msg) {
+            toastEl.textContent = msg;
+            toastEl.classList.remove('hidden');
+            setTimeout(() => toastEl.classList.add('hidden'), 2600);
+        }
+
+        async function verifyKey(key) {
+            try {
+                const res = await fetch('/api/admin/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+                    body: JSON.stringify({ action: 'verify' })
+                });
+                return res.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        async function initAuth() {
+            if (currentAdminKey) {
+                const valid = await verifyKey(currentAdminKey);
+                if (valid) {
+                    showDashboard();
+                    return;
+                }
+            }
+            showLogin();
+        }
+
+        function showLogin() {
+            loginView.classList.remove('hidden');
+            dashboardView.classList.add('hidden');
+            btnLogout.classList.add('hidden');
+        }
+
+        function showDashboard() {
+            loginView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            btnLogout.classList.remove('hidden');
+            loadPosts();
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const key = adminKeyInput.value.trim();
+            if (!key) return;
+            const valid = await verifyKey(key);
+            if (valid) {
+                currentAdminKey = key;
+                localStorage.setItem(STORAGE_KEY, key);
+                showToast('登入成功！');
+                showDashboard();
+            } else {
+                showToast('金鑰驗證失敗，請確認後重新輸入');
+            }
+        });
+
+        btnLogout.addEventListener('click', () => {
+            currentAdminKey = '';
+            localStorage.removeItem(STORAGE_KEY);
+            adminKeyInput.value = '';
+            showLogin();
+            showToast('已登出後台');
+        });
+
+        [tabPending, tabApproved].forEach((btn) => {
+            btn.addEventListener('click', () => {
+                tabPending.classList.toggle('active', btn === tabPending);
+                tabApproved.classList.toggle('active', btn === tabApproved);
+                currentTab = btn.dataset.tab;
+                loadPosts();
+            });
+        });
+
+        async function loadPosts() {
+            postsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">載入投稿列表中⋯</div>';
+            emptyState.classList.add('hidden');
+
+            try {
+                const res = await fetch(`/api/admin/posts?status=${currentTab}`, {
+                    headers: { 'x-admin-key': currentAdminKey }
+                });
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        showLogin();
+                        showToast('憑證過期或無效，請重新登入');
+                    }
+                    return;
+                }
+
+                const data = await res.json();
+                currentPosts = data.posts || [];
+                badgePending.textContent = data.counts?.pending || 0;
+                badgeApproved.textContent = data.counts?.approved || 0;
+
+                renderPosts(currentPosts);
+            } catch (err) {
+                postsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #d63031;">連線失敗，請重新整理頁面</div>';
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function renderPosts(posts) {
+            postsContainer.innerHTML = '';
+            if (posts.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.querySelector('.empty-title').textContent = currentTab === 'pending'
+                    ? '目前沒有待審核的投稿'
+                    : '目前尚無已核准的公開投稿';
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            posts.forEach((post) => {
+                const card = document.createElement('article');
+                card.className = 'admin-post-card';
+                card.id = `post-${post.id}`;
+
+                const isPending = post.status === 'pending';
+                const dateStr = new Date(post.createdAt).toLocaleString('zh-TW', { hour12: false });
+
+                card.innerHTML = `
+                    ${post.photoDataUrl ? `
+                        <div class="card-photo-wrap" title="點擊檢視高解析照片">
+                            <img src="${post.photoDataUrl}" alt="${post.areaId}">
+                        </div>
+                    ` : `
+                        <div class="card-no-photo">📝 純文字心得分享（無圖片）</div>
+                    `}
+                    <div class="card-content">
+                        <div class="card-badges">
+                            <span class="area-tag">📍 ${escapeHtml(post.areaId)}</span>
+                            <span class="status-tag ${isPending ? 'status-pending' : 'status-approved'}">
+                                ${isPending ? '⏳ 待審核' : '✅ 已公開'}
+                            </span>
+                        </div>
+                        <div class="card-meta">
+                            <span>👤 ${escapeHtml(post.author || '匿名旅人')}</span>
+                            <span>📅 ${escapeHtml(post.visitDate)}</span>
+                        </div>
+                        ${post.comment ? `<p class="card-comment">${escapeHtml(post.comment)}</p>` : '<p class="card-comment" style="color:#b2bec3;font-style:italic;">（無附心得文字）</p>'}
+                        <div class="card-actions">
+                            ${isPending ? `
+                                <button class="btn-action btn-approve" data-id="${post.id}">
+                                    <span>✅</span><span>核准通過</span>
+                                </button>
+                            ` : ''}
+                            <button class="btn-action btn-reject" data-id="${post.id}">
+                                <span>🗑️</span><span>${isPending ? '駁回並刪除' : '下架刪除'}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                if (post.photoDataUrl) {
+                    card.querySelector('.card-photo-wrap').addEventListener('click', () => {
+                        lightboxImg.src = post.photoDataUrl;
+                        lightboxModal.classList.remove('hidden');
+                    });
+                }
+
+                if (isPending) {
+                    card.querySelector('.btn-approve').addEventListener('click', () => handleAction(post.id, 'approve'));
+                }
+                card.querySelector('.btn-reject').addEventListener('click', () => handleAction(post.id, 'reject'));
+
+                postsContainer.appendChild(card);
+            });
+        }
+
+        async function handleAction(id, action) {
+            if (action === 'reject') {
+                if (!confirm('確定要徹底刪除此篇投稿與照片嗎？此操作不可逆。')) return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-key': currentAdminKey },
+                    body: JSON.stringify({ id, action })
+                });
+
+                if (res.ok) {
+                    showToast(action === 'approve' ? '✅ 已核准發佈至公開地圖！' : '🗑️ 已刪除該則投稿');
+                    loadPosts();
+                } else {
+                    showToast('操作失敗，請檢查權限');
+                }
+            } catch {
+                showToast('網路連線異常');
+            }
+        }
+
+        lightboxClose.addEventListener('click', () => lightboxModal.classList.add('hidden'));
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal) lightboxModal.classList.add('hidden');
+        });
+
+        initAuth();
+    </script>
+</body>
+</html>

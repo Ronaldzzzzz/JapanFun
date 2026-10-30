@@ -182,8 +182,10 @@ class CommunityStore {
     async deletePostAsync(postId, areaId) {
         if (typeof fetch !== 'undefined') {
             try {
+                const adminKey = typeof localStorage !== 'undefined' ? localStorage.getItem('japanfun_admin_secret_key') : '';
                 const res = await fetch(`/api/posts?id=${encodeURIComponent(postId)}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: adminKey ? { 'x-admin-key': adminKey } : {}
                 });
                 if (res.ok) {
                     await this.fetchPostsByAreaAsync(areaId);
@@ -544,7 +546,7 @@ class AreaInfoPanel {
                 submitBtn.textContent = '上傳發佈中⋯';
             }
 
-            await this.store.submitPostAsync({
+            const resPost = await this.store.submitPostAsync({
                 areaId: props.id,
                 author,
                 visitDate,
@@ -553,7 +555,11 @@ class AreaInfoPanel {
             });
 
             this.pendingPhotoDataUrl = null;
-            this.notify(`已新增 ${props.name} 的旅遊分享！`, 'success');
+            if (resPost?.status === 'pending') {
+                this.notify(`已收到你在 ${props.name} 的旅遊分享！管理員審核通過後即會公開上架。`, 'success');
+            } else {
+                this.notify(`已新增 ${props.name} 的旅遊分享！`, 'success');
+            }
             this.onPostsChange();
             this.render();
         });
@@ -574,6 +580,8 @@ class AreaInfoPanel {
             return;
         }
 
+        const isAdmin = typeof localStorage !== 'undefined' && Boolean(localStorage.getItem('japanfun_admin_secret_key'));
+
         listEl.innerHTML = '';
         posts.forEach((post) => {
             const item = document.createElement('article');
@@ -584,7 +592,7 @@ class AreaInfoPanel {
                     <div class="post-meta">
                         <span class="post-author">👤 ${this._escapeHtml(post.author)}</span>
                         <span class="post-date">${this._escapeHtml(post.visitDate)}</span>
-                        <button class="post-delete-btn" title="刪除此則分享">🗑️</button>
+                        ${isAdmin ? `<button class="post-delete-btn" title="管理員刪除此則分享">🗑️</button>` : ''}
                     </div>
                     ${post.comment ? `<p class="post-comment">${this._escapeHtml(post.comment)}</p>` : ''}
                 </div>`;
@@ -598,11 +606,16 @@ class AreaInfoPanel {
                 });
             }
 
-            item.querySelector('.post-delete-btn').addEventListener('click', async () => {
-                await this.store.deletePostAsync(post.id, props.id);
-                this.onPostsChange();
-                this.render();
-            });
+            const deleteBtn = item.querySelector('.post-delete-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', async () => {
+                    if (confirm('確定要下架此篇投稿嗎？')) {
+                        await this.store.deletePostAsync(post.id, props.id);
+                        this.onPostsChange();
+                        this.render();
+                    }
+                });
+            }
 
             listEl.appendChild(item);
         });
